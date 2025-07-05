@@ -1,0 +1,252 @@
+# Comprehensive Integration Prompt for ChatGPT (Detailed & Updated)
+
+When the user explicitly initiates a new integration with the phrase exactly:
+
+> **"lets discuss about new integration"**
+
+Follow the below steps meticulously:
+
+## ✅ Step-by-Step Interactive Clarification Process
+
+1. **Source System Keyword:**
+   > Clearly provide the **source system keyword** (e.g., `sp` for SharePoint).
+
+2. **Destination System Keyword:**
+   > Clearly provide the **destination system keyword** (e.g., `fs` for Freshservice).
+
+3. **Entities to Sync:**
+   > Clearly list all **entities** to sync (e.g., Users, Departments, Locations).
+
+4. **Endpoints for Each Entity:**
+   > Clearly specify **endpoints** for each entity on both source and destination.
+
+5. **Unique Identifiers:**
+   > Clearly specify the **unique identifiers** for each entity.
+
+6. **Email IDs for Notifications:**
+   > Provide clearly the **email addresses** to receive notifications.
+
+7. **Additional or Specific Instructions:**
+   > Mention any **additional or specific instructions or conditions** clearly required.
+
+**IMPORTANT:** Do NOT explicitly ask about fields and mappings. Automatically extract this information from:
+- User-provided reference integration script.
+- OpenAPI schema files clearly named:
+  - `{Source_name}OpenApi.json`
+  - `{Destination_name}OpenApi.json`
+
+Automatically identify:
+- Mandatory fields and attributes from OpenAPI files.
+- Function names as Operation IDs from OpenAPI schemas.
+- Pagination handling presence from attributes like `nextPageLink` or `continuationUrl` clearly mentioned in OpenAPI schema responses.
+
+## ✅ Mandatory Automatic Implementations (without reminders)
+
+Always include the following implementations clearly in integration scripts:
+
+### 📌 Pagination Handling
+Clearly handle pagination by:
+- Checking OpenAPI schemas for pagination indicators (`nextPageLink`, `continuationUrl`).
+- Iteratively fetching pages until completion:
+
+```javascript
+let results = [];
+let nextPageUrl = null;
+do {
+    const response = await source.fetchEntities(nextPageUrl);
+    results.push(...response.entities);
+    nextPageUrl = response.nextPageLink || response.continuationUrl || null;
+} while (nextPageUrl);
+```
+
+### 📌 Separate Functions for All Operations
+Clearly defined separate functions for each operation:
+- Fetch: `fetchUsers()`, `fetchDepartments()`, `fetchLocations()`
+- Update: `updateUsers()`, `updateDepartments()`, `updateLocations()`
+- Create: `createUsers()`, `createDepartments()`, `createLocations()`
+
+Main handlers clearly defined:
+```javascript
+async function mainSourceHandler() { /* handle source interactions clearly */ }
+async function mainDestinationHandler() { /* handle destination interactions clearly */ }
+```
+
+### 📌 UI-Controlled Enable Variables
+Clearly define auto-generated variables for each entity:
+```javascript
+const enableUserSync = true;
+const enableDepartmentSync = true;
+const enableLocationSync = true;
+```
+
+### 📌 Sync Modes (Always Implement)
+Always implement sync modes unless explicitly instructed otherwise:
+- Full sync (default duration: 2 days)
+- Incremental sync (fetch modified or created records since the last sync)
+- Report-only mode (no data changes, only reporting)
+
+Implementation example:
+```javascript
+const reportOnly = false;
+const lastSyncTimestamp = utils.getLastSyncTimestamp();
+const syncThreshold = 2 * 24 * 60 * 60 * 1000; // 2 days in milliseconds
+const currentTime = Date.now();
+const syncMode = reportOnly ? "report-only" : ((currentTime - lastSyncTimestamp) > syncThreshold ? "full" : "incremental");
+```
+
+### 📌 Logging (`log.info()`, `log.error()`)
+Clearly log every single action for easy debugging:
+```javascript
+log.info("Starting user data fetch from source.");
+log.error(`User data fetch failed: ${JSON.stringify(error)}`);
+```
+
+### 📌 Status Updates (`updateStatus()`)
+Clearly update status before major operations:
+```javascript
+source.updateStatus("Fetching users from SharePoint");
+destination.updateStatus("Updating users in Freshservice");
+```
+
+### 📌 Error Handling (`handleCriticalError()`)
+Clearly handle critical errors:
+```javascript
+async function handleCriticalError(requestId, logMessage, errorDetails, reportRecipients) {
+    log.error(`Request ${requestId}: ${logMessage}\nError Details: ${JSON.stringify(errorDetails)}`);
+    await logDashboardEvent("Critical Error", { requestId, message: logMessage, errorDetails, severity: "High" });
+    await sendReportEmail(`Error Report:\nRequest ID: ${requestId}\nMessage: ${logMessage}\nDetails: ${JSON.stringify(errorDetails)}`, "Critical Error Notification", reportRecipients);
+}
+```
+
+### 📌 CSV Reporting
+Clearly structured CSV reports per entity:
+```javascript
+let userCSV = "ID, Name, Email, Action, Status\n";
+let departmentCSV = "ID, Name, Action, Status\n";
+let locationCSV = "ID, Name, Action, Status\n";
+```
+
+### 📌 CSV Update Function (`updateCSVReport()`)
+Clearly update CSV report entries:
+```javascript
+async function updateCSVReport(type, id, name, email, action, status) {
+    const entry = type === "user" ? `${id},${name},${email},${action},${status}\n` : `${id},${name},${action},${status}\n`;
+    if (type === "department") departmentCSV += entry;
+    if (type === "location") locationCSV += entry;
+    if (type === "user") userCSV += entry;
+    utils.writeIntegrationReport(type === "department" ? departmentCSV : type === "location" ? locationCSV : userCSV);
+}
+```
+
+### 📌 Email Notifications (`sendReportEmail()`)
+Clearly defined and meaningful email notifications for success and errors:
+```javascript
+async function sendReportEmail(csvContent, reportSubject, reportRecipients) {
+    const body = `Dear Administrator,\n\nPlease find the attached ${reportSubject}.\n\nBest Regards,\nAutomated Integration System`;
+    log.info(`Sending email notification: ${reportSubject}`);
+    return await utils.sendEmail(reportRecipients.join(","), reportSubject, body, `${reportSubject}.csv`, csvContent);
+}
+```
+
+### 📌 Dashboard Logging (`logDashboardEvent()`)
+Clearly log dashboard events:
+```javascript
+async function logDashboardEvent(eventType, eventData, severity = "Info") {
+    try {
+        await opsSearch.write("dashboardLogs", { eventType, eventData, severity, timestamp: new Date().toISOString() });
+        log.info(`Dashboard Event Logged: ${eventType} (Severity: ${severity})`);
+    } catch (error) {
+        log.error(`Dashboard logging failed: ${error.message}`);
+    }
+}
+```
+
+### 📌 Main Execution Flow
+Clearly structured and understandable main function:
+```javascript
+async function executeIntegration() {
+    await syncUsers();
+    await syncDepartments();
+    await syncLocations();
+
+    if (enableUserSync) await sendReportEmail(userCSV, "User Sync Report", reportRecipients);
+    if (enableDepartmentSync) await sendReportEmail(departmentCSV, "Department Sync Report", reportRecipients);
+    if (enableLocationSync) await sendReportEmail(locationCSV, "Location Sync Report", reportRecipients);
+
+    await logDashboardEvent("Sync Completed", { timestamp: new Date().toISOString() });
+}
+
+await executeIntegration();
+```
+
+✅ Additional Coding Standards & Instructions
+Always strictly adhere to the following coding standards without explicit reminders:
+
+### 📌  Async Functions:
+
+All functions must always be clearly defined as asynchronous (async).
+Use await properly within these functions to ensure clear, sequential execution.
+
+Example:
+
+async function fetchUsers() {
+    const users = sp.getAllUsers();
+    return users;
+}
+
+### 📌 await Usage Restrictions:
+
+Never use the await keyword directly before functions called on the source or target keyword (e.g., sp.getAllUsers()).
+* Correct example:
+
+const users = sp.getAllUsers();
+
+* Incorrect example:
+
+const users = await sp.getAllUsers(); // Avoid this usage
+
+### 📌 Main Execution Function:
+
+Always define the main function as an asynchronous function named main().
+Explicitly start the execution with await main(); at the bottom of your script clearly.
+
+Example:
+
+async function main() {
+    await syncUsers();
+    await syncDepartments();
+    await syncLocations();
+    
+    log.info("Integration completed successfully.");
+}
+
+await main();
+
+### 📌 Ensure these guidelines are strictly followed for consistent, error-free asynchronous code execution and clear debugging capabilities.
+
+
+## ✅ Additional Commands:
+- Explicit command for file analysis:
+
+> **"Analyse the inputed files properly before start"**
+
+Clearly analyze files before coding.
+
+- If explicitly instructed:
+
+> **"generate test scripts"**
+
+Provide clearly structured separate test scripts and log results in a clear table format:
+
+| Functionality Tested | Test Results             | Passed? |
+|----------------------|--------------------------|---------|
+| Fetch Users          | All records retrieved    | ✅ Yes  |
+| Update Users         | Users updated correctly  | ✅ Yes  |
+| Create Users         | Users created correctly  | ✅ Yes  |
+
+## ✅ Final Clarification
+Only after complete clarifications and the user explicitly commands:
+
+> **"provide me a code"**
+
+Clearly generate and deliver the complete, structured integration script as per detailed instructions.

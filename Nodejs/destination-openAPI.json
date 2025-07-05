@@ -1,0 +1,1971 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "PingOne Workforce OpenAPI",
+        "description": "OpenAPI for pinOne workforce APIs",
+        "version": "latest",
+        "x-aquera": {
+            "primaryDeveloper": "praveen.yadav@aquera.com",
+            "secondaryDeveloper": "kapil.gupta@aquera.com",
+            "teamLead": "hanu.indrakanti@aquera.com",
+            "supportUrl": "https://support.aquera.com"
+        },
+        "contact": {
+            "name": "API Support",
+            "email": "support@pingone.com"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api.pingone.com",
+            "description": "PingOne API hostname"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/v1/environments/{envID}/users": {
+            "post": {
+                "summary": "Creates a new user in a specified environment.",
+                "description": "Creates a user resource in the PingOne environment. The user will belong to the specified population and can be enriched with additional attributes like name, department, contact info, and locale. A 201 status indicates successful creation. Use the response links for further user management tasks such as setting passwords or assigning roles.",
+                "operationId": "createEnvironmentUser",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The environment ID in which the user is to be created.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateRequest"
+                            },
+                            "example": {
+                                "email": "marysample@example.com",
+                                "name": {
+                                    "given": "Mary",
+                                    "family": "Sample"
+                                },
+                                "population": {
+                                    "id": "60971d3b-cc5a-4601-9c44-2be541f91bf1"
+                                },
+                                "username": "marysample",
+                                "department": "engineering",
+                                "locales": [
+                                    "Sydney",
+                                    "London"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                },
+                                "example": {
+                                    "id": "8376797d-641c-4e7b-8bc1-2fdf71916cab",
+                                    "email": "tomjones@example.com",
+                                    "username": "tomjones",
+                                    "name": {
+                                        "given": "Tom",
+                                        "family": "Jones"
+                                    },
+                                    "enabled": true,
+                                    "mfaEnabled": false,
+                                    "locales": [
+                                        "Sydney",
+                                        "London"
+                                    ],
+                                    "environment": {
+                                        "id": "abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6"
+                                    },
+                                    "population": {
+                                        "id": "60971d3b-cc5a-4601-9c44-2be541f91bf1"
+                                    },
+                                    "createdAt": "2020-02-18T20:50:14.092Z",
+                                    "updatedAt": "2020-02-18T20:50:14.092Z",
+                                    "_links": {
+                                        "self": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/users/8376797d-641c-4e7b-8bc1-2fdf71916cab"
+                                        },
+                                        "password": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/users/8376797d-641c-4e7b-8bc1-2fdf71916cab/password"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned if the provided input data contains invalid values.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returned if the authentication credentials are incorrect or missing.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "summary": "Retrieves a list of user resources from the specified PingOne environment.",
+                "description": "Returns a paginated list of users. Supports SCIM-style filtering on query parameters like `username`, `email`, `name.given`, etc. The `limit` parameter can restrict the number of results. You must have the Identity Data Admin role to read group membership information.",
+                "operationId": "getEnvironmentUsers",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Maximum number of users to return (1–1000).",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "required": false,
+                        "description": "SCIM filter string (e.g., username eq \"johnsmith\").",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "required": false,
+                        "description": "next cursor link",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "expand",
+                        "in": "query",
+                        "required": false,
+                        "description": "Expand nested entities like populations.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of user resources was returned successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserList"
+                                },
+                                "example": {
+                                    "count": 2,
+                                    "size": 2,
+                                    "_links": {
+                                        "self": {
+                                            "href": "https://api.pingone.com/v1/environments/{envID}/users?limit=100"
+                                        }
+                                    },
+                                    "_embedded": {
+                                        "users": [
+                                            {
+                                                "id": "27a68588-a2f4-4b67-a069-ce5c2caf8ecd",
+                                                "email": "johnsmith@example.com",
+                                                "username": "johnsmith",
+                                                "enabled": true,
+                                                "mfaEnabled": true,
+                                                "name": {
+                                                    "given": "John",
+                                                    "family": "Smith"
+                                                },
+                                                "population": {
+                                                    "id": "f8fe355c-a901-4592-8a21-7003bcfada94"
+                                                },
+                                                "environment": {
+                                                    "id": "{envID}"
+                                                },
+                                                "createdAt": "2023-08-15T16:26:02.104Z",
+                                                "updatedAt": "2023-08-15T16:26:09.213Z",
+                                                "_links": {
+                                                    "self": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}/users/27a68588-a2f4-4b67-a069-ce5c2caf8ecd"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "id": "75af2711-3361-4a3b-af10-7e399c5e08b1",
+                                                "email": "example@example.com",
+                                                "username": "testuser",
+                                                "enabled": true,
+                                                "mfaEnabled": false,
+                                                "name": {
+                                                    "given": "User",
+                                                    "family": "Test"
+                                                },
+                                                "population": {
+                                                    "id": "f8fe355c-a901-4592-8a21-7003bcfada94"
+                                                },
+                                                "environment": {
+                                                    "id": "{envID}"
+                                                },
+                                                "createdAt": "2023-09-19T16:47:43.112Z",
+                                                "updatedAt": "2023-09-19T16:54:18.267Z",
+                                                "_links": {
+                                                    "self": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}/users/75af2711-3361-4a3b-af10-7e399c5e08b1"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned if the request is malformed or includes invalid query parameters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returned if the request is unauthorized or the token is invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/environments/{envID}/users/{userID}": {
+            "get": {
+                "summary": "Retrieve a user resource by ID.",
+                "description": "Retrieves a single user resource by its ID from a PingOne environment. Use the `expand=population` query parameter to include population details. You must have the Identity Data Admin role to read group membership.",
+                "operationId": "getUserById",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The unique ID of the user.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "expand",
+                        "in": "query",
+                        "required": false,
+                        "description": "Optionally expand population details (e.g., expand=population).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "required": false,
+                        "description": "Optionally include group details (e.g., memberOfGroupNames, memberOfGroupIDs).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User data retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                },
+                                "example": {
+                                    "id": "2f9c3699-217e-4acb-9e80-9649311b3eb5",
+                                    "username": "jamesjoyce",
+                                    "enabled": true,
+                                    "mfaEnabled": false,
+                                    "createdAt": "2020-03-11T18:50:09.074Z",
+                                    "updatedAt": "2020-03-11T18:50:09.074Z",
+                                    "environment": {
+                                        "id": "abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6"
+                                    },
+                                    "population": {
+                                        "id": "706ff5fd-c2bc-4c2d-9037-bfa39112a651"
+                                    },
+                                    "_embedded": {
+                                        "population": {
+                                            "id": "706ff5fd-c2bc-4c2d-9037-bfa39112a651",
+                                            "_links": {
+                                                "self": {
+                                                    "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/populations/706ff5fd-c2bc-4c2d-9037-bfa39112a651"
+                                                },
+                                                "environment": {
+                                                    "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "_links": {
+                                        "self": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/users/2f9c3699-217e-4acb-9e80-9649311b3eb5"
+                                        },
+                                        "population": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/populations/706ff5fd-c2bc-4c2d-9037-bfa39112a651"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned if the request is malformed or includes invalid query parameters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returned if the request is unauthorized or the token is invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the user with the given ID is not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a user by ID.",
+                "description": "Deletes the specified user resource from the PingOne directory based on the provided environment and user ID. Returns HTTP 204 if successful.",
+                "operationId": "deleteUserById",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The unique ID of the user.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "User deleted successfully. No content returned."
+                    },
+                    "400": {
+                        "description": "Returned if the request is malformed or includes invalid path parameters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returned if the request is unauthorized or the token is invalid.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the user with the given ID is not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update user attributes by ID.",
+                "description": "Updates attribute properties for a specific user in a PingOne environment. The PUT operation replaces the existing values. Properties omitted from the request will be removed. A 403 error is returned if the user lacks permission to update specific attributes.",
+                "operationId": "updateUserById",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The unique ID of the user.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateRequest"
+                            },
+                            "example": {
+                                "username": "joe@example.com",
+                                "name": {
+                                    "formatted": "Joe Smith",
+                                    "given": "Joe",
+                                    "middle": "H.",
+                                    "family": "Smith",
+                                    "honorificPrefix": "Dr.",
+                                    "honorificSuffix": "IV"
+                                },
+                                "nickname": "Putty",
+                                "title": "Senior Director",
+                                "preferredLanguage": "en-gb;q=0.8, en;q=0.7",
+                                "locale": "en-gb",
+                                "email": "joe@example.com",
+                                "primaryPhone": "+1.2225554444",
+                                "mobilePhone": "+1.4445552222",
+                                "photo": {
+                                    "href": "https://example.com/image.jpg"
+                                },
+                                "address": {
+                                    "streetAddress": "123 Main Street",
+                                    "locality": "Springfield",
+                                    "region": "WA",
+                                    "postalCode": "98701",
+                                    "countryCode": "US"
+                                },
+                                "accountId": "5",
+                                "type": "tele",
+                                "timezone": "America/Los_Angeles"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned if the request is malformed or contains invalid values.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returned if authentication credentials are missing or incorrect.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned if the user is not permitted to update specific attributes.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the user was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Partially update user attributes by ID.",
+                "description": "Updates specific attribute properties for a user in a PingOne environment. Only the fields included in the PATCH body are updated. Fields not included remain unchanged. For multiValued attributes like `locales`, the entire array is replaced.",
+                "operationId": "patchUserById",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The unique ID of the user.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserPatchRequest"
+                            },
+                            "example": {
+                                "title": "Manager"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User attributes updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned if the request is malformed or contains invalid values.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returned if authentication credentials are missing or incorrect.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned if the user is not permitted to update specific attributes.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the user was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/environments/{envID}/users/{userID}/roleAssignments": {
+            "post": {
+                "summary": "Assigns a role to a user within a specified scope in a given environment.",
+                "description": "Creates a new role assignment for a user in the specified PingOne environment. The request body must include the role ID to be assigned and the scope in which the role applies. The scope type could be `ENVIRONMENT` or `POPULATION`, and the associated ID should match. This operation enables fine-grained control over user roles within PingOne environments.",
+                "operationId": "assignUserRole",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the environment where the user role assignment is to occur.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the user to whom the role will be assigned.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserRoleAssignmentRequest"
+                            },
+                            "example": {
+                                "role": {
+                                    "id": "0bd9c966-7664-4ac1-b059-0ff9293908e2"
+                                },
+                                "scope": {
+                                    "id": "abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6",
+                                    "type": "ENVIRONMENT"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Role assigned to user successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserRoleAssignment"
+                                },
+                                "example": {
+                                    "id": "d9b890bc-e8a8-4fd4-8650-a39c046fe5aa",
+                                    "role": {
+                                        "id": "0bd9c966-7664-4ac1-b059-0ff9293908e2"
+                                    },
+                                    "scope": {
+                                        "id": "abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6",
+                                        "type": "ENVIRONMENT"
+                                    },
+                                    "environment": {
+                                        "id": "abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6"
+                                    },
+                                    "user": {
+                                        "id": "8ce55f02-2077-4493-9a6d-0385df1f0772"
+                                    },
+                                    "readOnly": false,
+                                    "_links": {
+                                        "self": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/users/8ce55f02-2077-4493-9a6d-0385df1f0772/roleAssignments/d9b890bc-e8a8-4fd4-8650-a39c046fe5aa"
+                                        },
+                                        "user": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/users/8ce55f02-2077-4493-9a6d-0385df1f0772"
+                                        },
+                                        "environment": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request. The provided data may be malformed, exceed limits, or refer to non-existent role/scope/user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Missing or invalid authentication token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden. The authenticated user does not have permission to assign the specified role.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found. Either the user, environment, or role does not exist.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict. The role is already assigned to the user in the given scope.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "summary": "Retrieves all role assignments for a specified user.",
+                "description": "Returns a list of all roles assigned to a user within the specified PingOne environment. Each role assignment includes the role ID, the scope in which it applies, and links to the relevant resources.",
+                "operationId": "getUserRoleAssignments",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the user whose role assignments are being retrieved.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of roles assigned to the user retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserRoleAssignmentList"
+                                },
+                                "example": {
+                                    "count": 2,
+                                    "size": 2,
+                                    "_links": {
+                                        "self": {
+                                            "href": "https://api.pingone.com/v1/environments/{envID}/users/{userID}/roleAssignments"
+                                        },
+                                        "user": {
+                                            "href": "https://api.pingone.com/v1/environments/{envID}/users/{userID}"
+                                        },
+                                        "environment": {
+                                            "href": "https://api.pingone.com/v1/environments/{envID}"
+                                        }
+                                    },
+                                    "_embedded": {
+                                        "roleAssignments": [
+                                            {
+                                                "id": "d9b890bc-e8a8-4fd4-8650-a39c046fe5aa",
+                                                "role": {
+                                                    "id": "0bd9c966-7664-4ac1-b059-0ff9293908e2"
+                                                },
+                                                "scope": {
+                                                    "id": "{envID}",
+                                                    "type": "ENVIRONMENT"
+                                                },
+                                                "environment": {
+                                                    "id": "{envID}"
+                                                },
+                                                "user": {
+                                                    "id": "{userID}"
+                                                },
+                                                "readOnly": false,
+                                                "_links": {
+                                                    "self": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}/users/{userID}/roleAssignments/d9b890bc-e8a8-4fd4-8650-a39c046fe5aa"
+                                                    },
+                                                    "user": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}/users/{userID}"
+                                                    },
+                                                    "environment": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "id": "6559dcf2-a355-4662-9ea8-4562c8e143a7",
+                                                "role": {
+                                                    "id": "b5057d0d-7281-47f6-9398-8a7e4cb71397"
+                                                },
+                                                "scope": {
+                                                    "id": "{envID}",
+                                                    "type": "ENVIRONMENT"
+                                                },
+                                                "environment": {
+                                                    "id": "{envID}"
+                                                },
+                                                "user": {
+                                                    "id": "{userID}"
+                                                },
+                                                "readOnly": false,
+                                                "_links": {
+                                                    "self": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}/users/{userID}/roleAssignments/6559dcf2-a355-4662-9ea8-4562c8e143a7"
+                                                    },
+                                                    "user": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}/users/{userID}"
+                                                    },
+                                                    "environment": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Missing or invalid authentication token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User or environment not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/environments/{envID}/users/{userID}/roleAssignments/{roleAssignmentID}": {
+            "get": {
+                "summary": "Retrieves a specific role assignment for a user.",
+                "description": "Returns the role assignment resource identified by `roleAssignmentID` for the user specified by `userID` in the given environment. The response contains details about the role, its scope, and associated links.",
+                "operationId": "getUserRoleAssignmentById",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the user who holds the role assignment.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "roleAssignmentID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the role assignment to retrieve.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The role assignment was retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserRoleAssignment"
+                                },
+                                "example": {
+                                    "id": "d9b890bc-e8a8-4fd4-8650-a39c046fe5aa",
+                                    "role": {
+                                        "id": "0bd9c966-7664-4ac1-b059-0ff9293908e2"
+                                    },
+                                    "scope": {
+                                        "id": "abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6",
+                                        "type": "ENVIRONMENT"
+                                    },
+                                    "environment": {
+                                        "id": "abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6"
+                                    },
+                                    "user": {
+                                        "id": "8ce55f02-2077-4493-9a6d-0385df1f0772"
+                                    },
+                                    "readOnly": false,
+                                    "_links": {
+                                        "self": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/users/8ce55f02-2077-4493-9a6d-0385df1f0772/roleAssignments/d9b890bc-e8a8-4fd4-8650-a39c046fe5aa"
+                                        },
+                                        "user": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/users/8ce55f02-2077-4493-9a6d-0385df1f0772"
+                                        },
+                                        "environment": {
+                                            "href": "https://api.pingone.com/v1/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The request is missing a valid access token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found. The specified role assignment does not exist or is not associated with the given user/environment.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a specific role assignment from a user.",
+                "description": "Deletes the role assignment identified by `roleAssignmentID` for the user identified by `userID` in the specified PingOne environment. This operation removes the role assignment only for the specified user.",
+                "operationId": "deleteUserRoleAssignment",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the user whose role assignment is being deleted.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "roleAssignmentID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the role assignment to delete.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Role assignment successfully deleted. No content is returned."
+                    },
+                    "401": {
+                        "description": "Unauthorized. The request is missing a valid access token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found. The specified role assignment does not exist or does not belong to the given user/environment.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/environments/{envID}/roles": {
+            "get": {
+                "summary": "Retrieves all roles available in the specified environment.",
+                "description": "Returns a list of all roles defined within the specified PingOne environment. Each role includes its ID, name, description, applicable scopes, permissions, and assignment eligibility.",
+                "operationId": "getEnvironmentRoles",
+                "parameters": [
+                    {
+                        "name": "envID",
+                        "in": "path",
+                        "required": true,
+                        "description": "The PingOne environment ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of roles was returned successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleList"
+                                },
+                                "example": {
+                                    "count": 1,
+                                    "size": 1,
+                                    "_links": {
+                                        "self": {
+                                            "href": "https://api.pingone.com/v1/environments/{envID}/roles"
+                                        }
+                                    },
+                                    "_embedded": {
+                                        "roles": [
+                                            {
+                                                "id": "6f6793ad-4a5a-421b-8867-406ebee618de",
+                                                "name": "PingFederate User Administrator",
+                                                "description": "Create users, deactivate users, change or reset passwords, and install replacement license keys.",
+                                                "applicableTo": [
+                                                    "ENVIRONMENT",
+                                                    "ORGANIZATION"
+                                                ],
+                                                "permissions": [
+                                                    {
+                                                        "id": "console:display:environmentOverview"
+                                                    },
+                                                    {
+                                                        "id": "console:display:environmentProperties"
+                                                    },
+                                                    {
+                                                        "id": "globalregistry:read:console"
+                                                    },
+                                                    {
+                                                        "id": "licensing:read:license"
+                                                    },
+                                                    {
+                                                        "id": "orgmgt:read:deployment"
+                                                    },
+                                                    {
+                                                        "id": "orgmgt:read:environment"
+                                                    },
+                                                    {
+                                                        "id": "orgmgt:read:organization"
+                                                    },
+                                                    {
+                                                        "id": "pingfederate:admin:auditor"
+                                                    },
+                                                    {
+                                                        "id": "pingfederate:admin:users"
+                                                    },
+                                                    {
+                                                        "id": "pingid:read:migration"
+                                                    }
+                                                ],
+                                                "canAssign": [
+                                                    {
+                                                        "id": "b812ab8e-8fbc-45a9-b965-136849148040"
+                                                    }
+                                                ],
+                                                "type": "PLATFORM",
+                                                "_links": {
+                                                    "self": {
+                                                        "href": "https://api.pingone.com/v1/environments/{envID}/roles/6f6793ad-4a5a-421b-8867-406ebee618de"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Missing or invalid access token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Environment not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorCollection"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "Provide the bearer token generated by the OAuth authentication."
+            }
+        },
+        "schemas": {
+            "UserCreateRequest": {
+                "type": "object",
+                "required": [
+                    "username",
+                    "population"
+                ],
+                "properties": {
+                    "accountId": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "object",
+                        "properties": {
+                            "streetAddress": {
+                                "type": "string"
+                            },
+                            "countryCode": {
+                                "type": "string"
+                            },
+                            "locality": {
+                                "type": "string"
+                            },
+                            "region": {
+                                "type": "string"
+                            },
+                            "postalCode": {
+                                "type": "string"
+                            },
+                            "zipCode": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "locale": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "mobilePhone": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "object",
+                        "properties": {
+                            "given": {
+                                "type": "string"
+                            },
+                            "family": {
+                                "type": "string"
+                            },
+                            "middle": {
+                                "type": "string"
+                            },
+                            "honorificPrefix": {
+                                "type": "string"
+                            },
+                            "honorificSuffix": {
+                                "type": "string"
+                            },
+                            "formatted": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "nickname": {
+                        "type": "string"
+                    },
+                    "photo": {
+                        "type": "object",
+                        "properties": {
+                            "href": {
+                                "type": "string",
+                                "format": "uri"
+                            }
+                        }
+                    },
+                    "population": {
+                        "type": "object",
+                        "required": [
+                            "id"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "preferredLanguage": {
+                        "type": "string"
+                    },
+                    "primaryPhone": {
+                        "type": "string"
+                    },
+                    "timeZone": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "department": {
+                        "type": "string"
+                    },
+                    "locales": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "username": {
+                        "type": "string"
+                    }
+                }
+            },
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "mfaEnabled": {
+                        "type": "boolean"
+                    },
+                    "name": {
+                        "type": "object",
+                        "properties": {
+                            "given": {
+                                "type": "string"
+                            },
+                            "family": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "environment": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "population": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "locales": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "_links": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                "href": {
+                                    "type": "string",
+                                    "format": "uri"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ErrorCollection": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "code": {
+                                "type": "string"
+                            },
+                            "message": {
+                                "type": "string"
+                            },
+                            "details": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "field": {
+                                            "type": "string"
+                                        },
+                                        "issue": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UserList": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer"
+                    },
+                    "size": {
+                        "type": "integer"
+                    },
+                    "_links": {
+                        "type": "object",
+                        "properties": {
+                            "self": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "_embedded": {
+                        "type": "object",
+                        "properties": {
+                            "users": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UserPatchRequest": {
+                "type": "object",
+                "properties": {
+                    "accountId": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "object",
+                        "properties": {
+                            "streetAddress": {
+                                "type": "string"
+                            },
+                            "countryCode": {
+                                "type": "string"
+                            },
+                            "locality": {
+                                "type": "string"
+                            },
+                            "region": {
+                                "type": "string"
+                            },
+                            "postalCode": {
+                                "type": "string"
+                            },
+                            "zipCode": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "locale": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "mobilePhone": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "object",
+                        "properties": {
+                            "given": {
+                                "type": "string"
+                            },
+                            "family": {
+                                "type": "string"
+                            },
+                            "middle": {
+                                "type": "string"
+                            },
+                            "honorificPrefix": {
+                                "type": "string"
+                            },
+                            "honorificSuffix": {
+                                "type": "string"
+                            },
+                            "formatted": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "nickname": {
+                        "type": "string"
+                    },
+                    "photo": {
+                        "type": "object",
+                        "properties": {
+                            "href": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "population": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "preferredLanguage": {
+                        "type": "string"
+                    },
+                    "primaryPhone": {
+                        "type": "string"
+                    },
+                    "timeZone": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    }
+                }
+            },
+            "UserRoleAssignmentRequest": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "ID of the role to assign"
+                            }
+                        },
+                        "required": [
+                            "id"
+                        ]
+                    },
+                    "scope": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "ID of the scope resource (e.g., environment ID)"
+                            },
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "ENVIRONMENT",
+                                    "POPULATION"
+                                ],
+                                "description": "The type of scope"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "type"
+                        ]
+                    }
+                },
+                "required": [
+                    "role",
+                    "scope"
+                ]
+            },
+            "UserRoleAssignment": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The unique identifier for the role assignment."
+                    },
+                    "role": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "The ID of the assigned role."
+                            }
+                        },
+                        "required": [
+                            "id"
+                        ]
+                    },
+                    "scope": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "The ID of the resource the role applies to."
+                            },
+                            "type": {
+                                "type": "string",
+                                "description": "The type of scope (e.g., ENVIRONMENT, POPULATION).",
+                                "enum": [
+                                    "ENVIRONMENT",
+                                    "POPULATION"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "type"
+                        ]
+                    },
+                    "environment": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "The ID of the PingOne environment."
+                            }
+                        },
+                        "required": [
+                            "id"
+                        ]
+                    },
+                    "user": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "The ID of the user to whom the role is assigned."
+                            }
+                        },
+                        "required": [
+                            "id"
+                        ]
+                    },
+                    "readOnly": {
+                        "type": "boolean",
+                        "description": "Indicates whether the role assignment is read-only."
+                    },
+                    "_links": {
+                        "type": "object",
+                        "properties": {
+                            "self": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "description": "A link to this role assignment resource."
+                                    }
+                                },
+                                "required": [
+                                    "href"
+                                ]
+                            },
+                            "user": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "description": "A link to the associated user."
+                                    }
+                                },
+                                "required": [
+                                    "href"
+                                ]
+                            },
+                            "environment": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "description": "A link to the associated environment."
+                                    }
+                                },
+                                "required": [
+                                    "href"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "self",
+                            "user",
+                            "environment"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "role",
+                    "scope",
+                    "environment",
+                    "user",
+                    "readOnly",
+                    "_links"
+                ]
+            },
+            "UserRoleAssignmentList": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "description": "Total number of role assignments returned."
+                    },
+                    "size": {
+                        "type": "integer",
+                        "description": "The number of role assignments in this response."
+                    },
+                    "_links": {
+                        "type": "object",
+                        "properties": {
+                            "self": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "description": "Link to the current resource."
+                                    }
+                                },
+                                "required": [
+                                    "href"
+                                ]
+                            },
+                            "user": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    }
+                                },
+                                "required": [
+                                    "href"
+                                ]
+                            },
+                            "environment": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    }
+                                },
+                                "required": [
+                                    "href"
+                                ]
+                            }
+                        }
+                    },
+                    "_embedded": {
+                        "type": "object",
+                        "properties": {
+                            "roleAssignments": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/UserRoleAssignment"
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "count",
+                    "size",
+                    "_links",
+                    "_embedded"
+                ]
+            },
+            "RoleList": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "description": "Total number of roles available in the environment."
+                    },
+                    "size": {
+                        "type": "integer",
+                        "description": "The number of roles returned in this response."
+                    },
+                    "_links": {
+                        "type": "object",
+                        "properties": {
+                            "self": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    }
+                                },
+                                "required": [
+                                    "href"
+                                ]
+                            }
+                        }
+                    },
+                    "_embedded": {
+                        "type": "object",
+                        "properties": {
+                            "roles": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Role"
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "count",
+                    "size",
+                    "_links",
+                    "_embedded"
+                ]
+            },
+            "Role": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The unique identifier for the role."
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the role."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "A short description of what the role does."
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The type of role.",
+                        "enum": [
+                            "PLATFORM",
+                            "ADMIN",
+                            "CUSTOM"
+                        ]
+                    },
+                    "applicableTo": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "ENVIRONMENT",
+                                "ORGANIZATION",
+                                "POPULATION"
+                            ]
+                        },
+                        "description": "List of scope types where this role can be assigned."
+                    },
+                    "permissions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "The ID of the permission included in the role."
+                                }
+                            },
+                            "required": [
+                                "id"
+                            ]
+                        }
+                    },
+                    "canAssign": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "ID of a related entity that this role can assign."
+                                }
+                            },
+                            "required": [
+                                "id"
+                            ]
+                        }
+                    },
+                    "_links": {
+                        "type": "object",
+                        "properties": {
+                            "self": {
+                                "type": "object",
+                                "properties": {
+                                    "href": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    }
+                                },
+                                "required": [
+                                    "href"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "type",
+                    "applicableTo",
+                    "permissions",
+                    "canAssign",
+                    "_links"
+                ]
+            }
+        }
+    }
+}

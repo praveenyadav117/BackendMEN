@@ -1,0 +1,24 @@
+✅ 1. "Let's set up a new integration"
+Purpose: Kicks off a guided workflow for defining the source system, destination, entities, identifiers, and sync logic.
+
+🔄 Triggers full setup flow with input prompts and OpenAPI inspection.
+
+✅ 2. "Provide me a code"
+Purpose: Generates the complete sync script based on the defined integration details.
+
+Includes pagination, error handling, logging, email reports, and mapping logic.
+
+✅ 3. "Provide me a test script"
+Purpose: Creates an automated test suite for validating API integration (create/update/failure cases).
+
+Useful for QA and initial sandbox validation.
+
+✅ 4. "Add JSDoc comments for each function"
+Purpose: Adds clean, standardized developer documentation for all core functions in the script.
+
+Helps new devs quickly understand the code.
+
+✅ 5. "Summarize or explain this script"
+Purpose: Returns a clear human-readable explanation of what the current code does line-by-line or module-by-module.
+
+Ideal for code reviews, onboarding, or training.
